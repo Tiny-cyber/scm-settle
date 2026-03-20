@@ -16,21 +16,32 @@ if %ERRORLEVEL%==0 (
     echo × 未检测到 Node.js
     echo   请先安装: https://nodejs.org/
     echo   下载 LTS 版本，安装时勾选 "Add to PATH"
+    echo   装完后重新运行此脚本
     pause
     exit /b 1
 )
 
-:: 2. 检查 Chrome
+:: 2. 检查浏览器（Chrome 或 Edge）
+set "BROWSER_PATH="
 if exist "C:\Program Files\Google\Chrome\Application\chrome.exe" (
-    echo √ Chrome 已安装
+    set "BROWSER_PATH=C:\Program Files\Google\Chrome\Application\chrome.exe"
+    set "BROWSER_NAME=Chrome"
 ) else if exist "%LOCALAPPDATA%\Google\Chrome\Application\chrome.exe" (
-    echo √ Chrome 已安装
+    set "BROWSER_PATH=%LOCALAPPDATA%\Google\Chrome\Application\chrome.exe"
+    set "BROWSER_NAME=Chrome"
+) else if exist "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" (
+    set "BROWSER_PATH=C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
+    set "BROWSER_NAME=Edge"
+) else if exist "C:\Program Files\Microsoft\Edge\Application\msedge.exe" (
+    set "BROWSER_PATH=C:\Program Files\Microsoft\Edge\Application\msedge.exe"
+    set "BROWSER_NAME=Edge"
 ) else (
-    echo × 未检测到 Chrome
-    echo   请先安装: https://www.google.com/chrome/
+    echo × 未检测到 Chrome 或 Edge
+    echo   请安装其中一个（推荐 Chrome）
     pause
     exit /b 1
 )
+echo √ 检测到 %BROWSER_NAME%
 
 :: 3. 安装依赖
 echo.
@@ -44,30 +55,31 @@ echo √ 依赖安装完成
 mkdir "%USERPROFILE%\Desktop\工作台\电商\每日结算报告" 2>nul
 echo √ 工作台目录已创建
 
-:: 5. 创建 Chrome 调试模式启动脚本
-set "CHROME_DEBUG=%USERPROFILE%\Desktop\工作台\电商\启动调试Chrome.bat"
-(
+:: 5. 创建浏览器调试模式启动脚本
+set "BROWSER_DEBUG=%USERPROFILE%\Desktop\工作台\电商\启动调试浏览器.bat"
+> "%BROWSER_DEBUG%" (
 echo @echo off
-echo title Chrome 调试模式
-echo start "" "C:\Program Files\Google\Chrome\Application\chrome.exe" --remote-debugging-port=9222 --user-data-dir="%USERPROFILE%\.chrome-debug-profile"
+echo title 调试浏览器 - %BROWSER_NAME%
+echo start "" "%BROWSER_PATH%" --remote-debugging-port=9222 --user-data-dir="%USERPROFILE%\.chrome-debug-profile"
 echo exit
-) > "%CHROME_DEBUG%"
-echo √ Chrome 调试模式启动脚本已创建
+)
+echo √ 调试浏览器启动脚本已创建（使用 %BROWSER_NAME%）
 
 :: 6. 创建双击运行文件
+set "SETTLE_DIR=%~dp0"
 set "COMMAND_FILE=%USERPROFILE%\Desktop\工作台\电商\一键结算.bat"
-(
+> "%COMMAND_FILE%" (
 echo @echo off
 echo chcp 65001 ^>nul
 echo title SCM 一键结算
-echo cd /d "%~dp0..\..\..\..\Projects\scm-settle"
+echo cd /d "%SETTLE_DIR%"
+echo.
 echo echo ==============================
 echo echo   SCM 一键结算
 echo echo ==============================
 echo echo.
 echo.
-echo :: 计算昨天日期
-echo for /f "tokens=1-3 delims=/" %%%%a in ('powershell -command "(Get-Date^).AddDays(-1^).ToString('yyyy/MM/dd')"'^) do set YESTERDAY=%%%%a-%%%%b-%%%%c
+echo for /f "usebackq" %%%%a in ^(`powershell -command "(Get-Date).AddDays(-1).ToString('yyyy-MM-dd')"`^) do set YESTERDAY=%%%%a
 echo.
 echo echo 请输入要结算的日期（直接回车默认昨天 %%YESTERDAY%%）：
 echo echo   格式: 2026-03-19（单日）或 2026-03（整月）
@@ -80,8 +92,8 @@ echo echo.
 echo node settle-all.js "%%INPUT_DATE%%"
 echo echo.
 echo pause
-) > "%COMMAND_FILE%"
-echo √ 双击运行文件已创建
+)
+echo √ 一键结算脚本已创建
 
 :: 完成
 echo.
@@ -90,8 +102,8 @@ echo   √ 安装完成！
 echo ==============================
 echo.
 echo 还差最后一步（只需做一次）：
-echo   1. 双击 桌面\工作台\电商\启动调试Chrome.bat
-echo   2. 在弹出的 Chrome 里打开 https://zyhx.scm.xinwuyun.com 并登录
+echo   1. 双击 桌面\工作台\电商\启动调试浏览器.bat
+echo   2. 在弹出的浏览器里打开 https://zyhx.scm.xinwuyun.com 并登录
 echo.
 echo 之后每次使用：
 echo   双击 桌面\工作台\电商\一键结算.bat
