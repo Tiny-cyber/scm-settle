@@ -38,7 +38,7 @@ async function extractOrders(page, dateMin, dateMax) {
   let pageNum = 1;
 
   while (true) {
-    const result = await page.evaluate(async ({ pageNum, pageSize }) => {
+    const result = await page.evaluate(async ({ pageNum, pageSize, dateMin, dateMax }) => {
       const res = await fetch('/biz-scm/purchase-storage/pageDto', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -46,6 +46,8 @@ async function extractOrders(page, dateMin, dateMax) {
           conditions: [
             { group: 'master', field: 'status', operator: 'in', value: ['2'], not: false },
             { group: 'master', field: 'is_settlement', operator: 'eq', value: '0', not: false },
+            { group: 'master', field: 'checked', operator: 'gte', value: dateMin + ' 00:00:00', not: false },
+            { group: 'master', field: 'checked', operator: 'lte', value: dateMax + ' 23:59:59', not: false },
           ],
           sorts: [],
           pagger: { page: pageNum, limit: pageSize },
@@ -53,7 +55,7 @@ async function extractOrders(page, dateMin, dateMax) {
         })
       });
       return await res.json();
-    }, { pageNum, pageSize: CONFIG.pageSize });
+    }, { pageNum, pageSize: CONFIG.pageSize, dateMin, dateMax });
 
     if (result.code !== 200) {
       throw new Error(`查询失败: ${result.msg || JSON.stringify(result)}`);
@@ -68,12 +70,12 @@ async function extractOrders(page, dateMin, dateMax) {
     pageNum++;
   }
 
-  // API 日期条件不生效，本地按核对日期过滤
+  // 二次校验：确保日期范围准确
   const filtered = allItems.filter(item => {
     const checkedDate = (item.checked || '').slice(0, 10);
     return checkedDate >= dateMin && checkedDate <= dateMax;
   });
-  console.log(`查询到 ${allItems.length} 条，按核对日期 ${dateMin} ~ ${dateMax} 过滤后: ${filtered.length} 条`);
+  console.log(`API 返回 ${allItems.length} 条，校验后: ${filtered.length} 条`);
 
   // 按来源单号去重
   const orderMap = {};
