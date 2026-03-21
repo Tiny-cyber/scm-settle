@@ -32,9 +32,13 @@ if (!browser) {
 }
 console.log(`√ 检测到 ${browser.name}`);
 
-// 2. 安装依赖
+// 2. 安装依赖（跳过 Playwright 浏览器下载，脚本连接已有的 Edge/Chrome）
 console.log('\n安装依赖...');
-execSync('npm install --silent', { cwd: projectDir, stdio: 'inherit' });
+execSync('npm install --silent', {
+  cwd: projectDir,
+  stdio: 'inherit',
+  env: { ...process.env, PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1' },
+});
 console.log('√ 依赖安装完成');
 
 // 3. 创建工作台目录
