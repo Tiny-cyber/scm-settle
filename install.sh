@@ -36,6 +36,11 @@ if [ -d "$INSTALL_DIR/.git" ]; then
   cd "$INSTALL_DIR"
   git pull
 else
+  # 如果文件夹存在但不是 git 项目（旧版手动拷贝的），先删掉再 clone
+  if [ -d "$INSTALL_DIR" ]; then
+    echo "检测到旧版本（非 git），清理后重新下载..."
+    rm -rf "$INSTALL_DIR"
+  fi
   echo "下载项目..."
   mkdir -p "$HOME/Projects"
   git clone https://github.com/Tiny-cyber/scm-settle.git "$INSTALL_DIR"

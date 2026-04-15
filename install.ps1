@@ -3,6 +3,9 @@
 
 $ErrorActionPreference = "Stop"
 
+# 解除脚本执行限制（仅当前进程，不影响系统设置）
+Set-ExecutionPolicy Bypass -Scope Process -Force
+
 Write-Host "=============================="
 Write-Host "  SCM 一键结算 - Windows 安装"
 Write-Host "==============================`n"
@@ -86,6 +89,11 @@ if (Test-Path "$installDir\.git") {
     Set-Location $installDir
     git pull
 } else {
+    # 如果文件夹存在但不是 git 项目（旧版手动拷贝的），先删掉再 clone
+    if (Test-Path $installDir) {
+        Write-Host "检测到旧版本（非 git），清理后重新下载..."
+        Remove-Item -Recurse -Force $installDir
+    }
     Write-Host "下载项目..."
     New-Item -ItemType Directory -Path "$HOME\Projects" -Force | Out-Null
     git clone https://github.com/Tiny-cyber/scm-settle.git $installDir
