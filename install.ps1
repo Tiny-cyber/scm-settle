@@ -106,63 +106,8 @@ $env:PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD = "1"
 npm install --silent
 Write-Host "[OK] 依赖安装完成"
 
-# 6. 创建工作台目录
-$desktopPath = [Environment]::GetFolderPath("Desktop")
-$reportDir = "$desktopPath\工作台\电商\每日结算报告"
-New-Item -ItemType Directory -Path $reportDir -Force | Out-Null
-Write-Host "[OK] 工作台目录已创建"
+# 6. 用 install.js 创建工作台目录和桌面脚本（Node.js 处理编码更可靠）
+Write-Host "创建桌面快捷脚本..."
+node install.js
 
-# 7. 创建调试浏览器启动脚本
-$profileDir = "$HOME\.chrome-debug-profile"
-$debugBat = "$desktopPath\工作台\电商\启动调试浏览器.bat"
-$debugContent = @"
-@echo off
-title 调试浏览器 - $($browser.Name)
-start "" "$($browser.Path)" --remote-debugging-port=9222 --user-data-dir="$profileDir"
-exit
-"@
-Set-Content -Path $debugBat -Value $debugContent -Encoding UTF8
-Write-Host "[OK] 调试浏览器启动脚本已创建（使用 $($browser.Name)）"
-
-# 8. 创建一键结算脚本
-$nodePath = (Get-Command node).Source | Split-Path
-$settleBat = "$desktopPath\工作台\电商\一键结算.bat"
-$settleContent = @"
-@echo off
-chcp 65001 >nul
-title SCM 一键结算
-cd /d "$installDir"
-
-echo ==============================
-echo   SCM 一键结算
-echo ==============================
-echo.
-
-for /f "usebackq" %%a in (`powershell -command "(Get-Date).AddDays(-1).ToString('yyyy-MM-dd')"`) do set YESTERDAY=%%a
-
-echo 请输入要结算的日期（直接回车默认昨天 %YESTERDAY%）：
-echo   格式: 2026-03-19（单日）或 2026-03（整月）
-echo.
-set /p "INPUT_DATE=> "
-if "%INPUT_DATE%"=="" set "INPUT_DATE=%YESTERDAY%"
-
-echo 开始结算: %INPUT_DATE%
-echo.
-node settle-all.js "%INPUT_DATE%"
-echo.
-pause
-"@
-Set-Content -Path $settleBat -Value $settleContent -Encoding UTF8
-Write-Host "[OK] 一键结算脚本已创建"
-
-# 完成
-Write-Host "`n=============================="
-Write-Host "  [OK] 安装完成！"
-Write-Host "==============================`n"
-Write-Host "还差最后一步（只需做一次）："
-Write-Host "  1. 双击 桌面\工作台\电商\启动调试浏览器.bat"
-Write-Host "  2. 在弹出的浏览器里打开 https://zyhx.scm.xinwuyun.com 并登录`n"
-Write-Host "之后每次使用："
-Write-Host "  双击 桌面\工作台\电商\一键结算.bat"
-Write-Host "  报告自动保存到 桌面\工作台\电商\每日结算报告\`n"
-Read-Host "按回车关闭"
+Read-Host "`n按回车关闭"

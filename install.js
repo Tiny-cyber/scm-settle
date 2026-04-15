@@ -51,7 +51,7 @@ const debugBat = path.join(home, 'Desktop', '工作台', '电商', '启动调试
 fs.writeFileSync(debugBat, [
   '@echo off',
   `title 调试浏览器 - ${browser.name}`,
-  `start "" "${browser.path}" --remote-debugging-port=9222 --user-data-dir="${path.join(home, '.chrome-debug-profile')}"`,
+  `start "" "${browser.path}" --remote-debugging-port=9222 --user-data-dir="${path.join(home, '.chrome-debug-profile')}" https://zyhx.scm.xinwuyun.com`,
   'exit',
 ].join('\r\n'), 'utf8');
 console.log(`√ 调试浏览器启动脚本已创建（使用 ${browser.name}）`);
