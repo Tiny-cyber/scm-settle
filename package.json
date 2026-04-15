@@ -1,0 +1,17 @@
+{
+  "name": "scm-settle",
+  "version": "1.0.0",
+  "description": "SCM 采购结算自动化 - 一键提取+结算",
+  "main": "settle.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "playwright": "^1.58.2",
+    "xlsx": "^0.18.5"
+  }
+}

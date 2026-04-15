@@ -1,0 +1,10 @@
+node_modules/
+.chrome-debug-profile/
+*.backup*.js
+*.current-broken.js
+*.bak
+*.bak-*
+*.bak2
+checkin-qr.png
+.checkin-qr-hostname
+checkin-data/
