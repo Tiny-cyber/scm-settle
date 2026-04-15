@@ -110,7 +110,9 @@ echo ""
 
 YESTERDAY=\$(date -v-1d +%Y-%m-%d)
 echo "请输入要结算的日期（回车默认昨天 \$YESTERDAY）："
-echo "  格式: 2026-03-19（单日）或 2026-03（整月）"
+echo "  格式: 2026-03-19           （单日）"
+echo "        2026-03              （整月）"
+echo "        2026-03-19 2026-04-03（日期范围）"
 echo ""
 read -p "> " INPUT_DATE
 DATE=\${INPUT_DATE:-\$YESTERDAY}
@@ -119,7 +121,7 @@ echo ""
 echo "开始结算: \$DATE"
 echo ""
 
-node settle-all.js "\$DATE"
+node settle-all.js \$DATE
 
 echo ""
 echo "按回车关闭窗口..."
