@@ -56,32 +56,14 @@ fs.writeFileSync(debugBat, [
 ].join('\r\n'), 'utf8');
 console.log(`√ 调试浏览器启动脚本已创建（使用 ${browser.name}）`);
 
-// 5. 创建一键结算脚本
+// 5. 创建一键结算脚本（纯 ASCII，中文交给 run-interactive.js 输出）
 const settleBat = path.join(home, 'Desktop', '工作台', '电商', '一键结算.bat');
 fs.writeFileSync(settleBat, [
   '@echo off',
   'chcp 65001 >nul',
-  'title SCM 一键结算',
   `cd /d "${projectDir}"`,
-  '',
-  'echo ==============================',
-  'echo   SCM 一键结算',
-  'echo ==============================',
-  'echo.',
-  '',
-  'for /f "usebackq" %%a in (`powershell -command "(Get-Date).AddDays(-1).ToString(\'yyyy-MM-dd\')"`) do set YESTERDAY=%%a',
-  '',
-  'echo 请输入要结算的日期（直接回车默认昨天 %YESTERDAY%）：',
-  'echo   格式: 2026-03-19           （单日）',
-  'echo         2026-03              （整月）',
-  'echo         2026-03-19 2026-04-03（日期范围）',
-  'echo.',
-  'set /p "INPUT_DATE=> "',
-  'if "%INPUT_DATE%"=="" set "INPUT_DATE=%YESTERDAY%"',
-  '',
-  'echo 开始结算: %INPUT_DATE%',
-  'echo.',
-  'node settle-all.js %INPUT_DATE%',
+  'git pull --ff-only >nul 2>&1',
+  'node run-interactive.js',
   'echo.',
   'pause',
 ].join('\r\n'), 'utf8');
